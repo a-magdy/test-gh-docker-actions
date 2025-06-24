@@ -1,0 +1,9 @@
+name: "Docker Image Private ACR"
+description: "Test Docker Image in Private ACR"
+runs:
+  using: "docker"
+  image: "docker://testgh.azurecr.io/test:latest"
+  args:
+    - "/bin/sh"
+    - "-c"
+    - echo "Running from inside the Docker container"

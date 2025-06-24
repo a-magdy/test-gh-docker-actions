@@ -1,0 +1,6 @@
+name: "Dockerfile Private ACR"
+description: "Test Dockerfile in Private ACR"
+
+runs:
+  using: "docker"
+  image: "Dockerfile"

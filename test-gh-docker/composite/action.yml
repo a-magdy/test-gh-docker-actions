@@ -1,0 +1,9 @@
+name: "Docker composite Private Action"
+description: "Test Docker composite action in Private ACR"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Docker run
+      shell: bash
+      run: docker run --rm --entrypoint /bin/sh testgh.azurecr.io/test -c 'echo "Hello from Docker container"'
