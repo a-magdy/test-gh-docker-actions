@@ -1,4 +1,4 @@
-name: Test GH Docker Actions
+name: Test GH Docker Actions (ACR)
 
 on:
   workflow_dispatch:
