@@ -1,0 +1,46 @@
+name: Test Image Action
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+env:
+  DOCKER_REGISTRY_URL: ghcr.io
+  DOCKER_REGISTRY_USER: a-magdy
+
+jobs:
+  run-image-action-fails:
+    name: Image (Fails)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: a-magdy/test-gh-docker-actions/common/docker-registry-login@main
+        with:
+          registry: ${{ env.DOCKER_REGISTRY_URL }}
+          username: ${{ env.DOCKER_REGISTRY_USER }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: a-magdy/test-gh-docker-actions/test-gh-docker/image@main
+    continue-on-error: true
+
+  run-image-action-succeeds:
+    name: Image (Succeeds)
+    runs-on: ubuntu-latest
+    needs: run-image-action-fails
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: a-magdy/test-gh-docker-actions/common/docker-registry-login@main
+        with:
+          registry: ${{ env.DOCKER_REGISTRY_URL }}
+          username: ${{ env.DOCKER_REGISTRY_USER }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/checkout@v4
+
+      - run: docker pull ghcr.io/a-magdy/ubuntu
+
+      - uses: ./test-gh-docker/image
