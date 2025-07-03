@@ -1,5 +1,5 @@
-name: "Dockerfile Private ACR"
-description: "Test Dockerfile in Private ACR"
+name: "Dockerfile Private Registry"
+description: "Test Dockerfile action with private registry"
 
 runs:
   using: "docker"

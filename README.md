@@ -2,9 +2,15 @@
 
 This repository demonstrates authentication issues when using GitHub Actions with Docker actions and private registries. The tests showcase when Docker actions fail unexpectedly and when they succeed for different action types.
 
+> **🎯 Key Finding**: GitHub Actions pulls Docker images for actions **before** running authentication steps, causing failures with private registries. This repository provides comprehensive tests and workarounds for this behavior.
+
 ## Problem Overview
 
-The problem centers around when private images are being pulled. In certain scenarios, GitHub Actions tries to pull the images early in the process, but ends up doing it before the login has happened, resulting in a 401 Unauthorized error.
+The problem centers around **when** private images are being pulled. In certain scenarios, GitHub Actions tries to pull images early in the process, but does so **before** authentication has occurred, resulting in a `401 Unauthorized` error.
+
+**Specific Issue**: GitHub Actions automatically pulls Docker images for `using: "docker"` actions during the workflow setup phase, which happens before any workflow steps (including authentication steps) are executed. This timing issue makes it impossible to authenticate before the image pull, causing failures with private registries.
+
+**Impact**: This affects any organization using private container registries (GHCR, ACR, ECR, etc.) and wanting to use the `using: "docker"` action type in their reusable actions.
 
 ## What We're Testing
 
@@ -63,9 +69,9 @@ test-gh-docker/
 └── dind.yml                # 🔄 Individual: Docker-in-Docker tests
 ```
 
-## Example Results
+## Example Behavior
 
-After running `docker/login-action` to authenticate with a private registry:
+After running `docker/login-action@v3` to authenticate with a private registry:
 
 ```yaml
 - uses: docker/login-action@v3
@@ -116,20 +122,7 @@ This affects enterprise users with private registries and forces:
 - **Authentication**: `docker/login-action@v3`
 - **GitHub Token**: `GITHUB_TOKEN` with `packages: read` permission
 
-## Contributing
-
-To reproduce these issues:
-
-1. **Fork this repository**
-2. **Push Docker images to your private registry**
-3. **Update registry URLs in workflows**
-4. **Run the workflows and observe the authentication failures**
-
-The failing tests demonstrate the core issue, while the succeeding tests show the necessary workarounds.
-
----
-
-**References**:
+## References
 
 - [josh-ops - Create a Docker Container Action Hosted in a Private Image Registry](https://josh-ops.com/posts/github-actions-docker-actions-private-registry/)
 - [moby/moby - Issue 38591](https://github.com/moby/moby/issues/38591) (potentially relevant)
