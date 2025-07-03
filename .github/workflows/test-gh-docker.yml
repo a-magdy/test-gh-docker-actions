@@ -1,143 +1,161 @@
-name: Test GH Docker Actions (ACR)
+name: Test Docker Actions with Private Images
 
 on:
   workflow_dispatch:
-  # push:
-  #   branches: [main]
-  # pull_request:
-  #   branches: [main]
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 env:
-  TESTGH_ACR_REGISTRY: testgh.azurecr.io
-  TESTGH_ACR_USERNAME: testgh
+  DOCKER_REGISTRY_URL: ghcr.io
+  DOCKER_REGISTRY_USER: a-magdy
 
 jobs:
-  run-composite-action:
-    name: Run Composite Action
+  run-composite-action-succeeds:
+    name: Composite (Succeeds)
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      packages: read
     steps:
       - uses: a-magdy/test-gh-docker-actions/common/docker-registry-login@main
         with:
-          registry: ${{ env.TESTGH_ACR_REGISTRY }}
-          username: ${{ env.TESTGH_ACR_USERNAME }}
-          password: ${{ secrets.TESTGH_ACR_PASSWORD }}
+          registry: ${{ env.DOCKER_REGISTRY_URL }}
+          username: ${{ env.DOCKER_REGISTRY_USER }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: a-magdy/test-gh-docker-actions/test-gh-docker/composite@main
+        with:
+          image: ${{ env.DOCKER_REGISTRY_URL }}/${{ env.DOCKER_REGISTRY_USER }}/ubuntu
 
-  run-dockerfile-action-fail:
-    name: Run Dockerfile Action (Fails)
+  run-dockerfile-action-fails:
+    name: Dockerfile (Fails)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     steps:
       - uses: a-magdy/test-gh-docker-actions/common/docker-registry-login@main
         with:
-          registry: ${{ env.TESTGH_ACR_REGISTRY }}
-          username: ${{ env.TESTGH_ACR_USERNAME }}
-          password: ${{ secrets.TESTGH_ACR_PASSWORD }}
+          registry: ${{ env.DOCKER_REGISTRY_URL }}
+          username: ${{ env.DOCKER_REGISTRY_USER }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: a-magdy/test-gh-docker-actions/test-gh-docker/dockerfile@main
     continue-on-error: true
-
-  run-dockerfile-action-success:
-    name: Run Dockerfile Action
+  run-dockerfile-action-succeeds:
+    name: Dockerfile (Succeeds)
     runs-on: ubuntu-latest
-    needs: run-dockerfile-action-fail
+    needs: run-dockerfile-action-fails
     permissions:
       contents: read
+      packages: read
     steps:
       - uses: a-magdy/test-gh-docker-actions/common/docker-registry-login@main
         with:
-          registry: ${{ env.TESTGH_ACR_REGISTRY }}
-          username: ${{ env.TESTGH_ACR_USERNAME }}
-          password: ${{ secrets.TESTGH_ACR_PASSWORD }}
+          registry: ${{ env.DOCKER_REGISTRY_URL }}
+          username: ${{ env.DOCKER_REGISTRY_USER }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/checkout@v4
 
       - name: Run Dockerfile Action
         uses: ./test-gh-docker/dockerfile
 
-  run-image-action-fail:
-    name: Run Image Action (Fails)
+  run-image-action-fails:
+    name: Image (Fails)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     steps:
       - uses: a-magdy/test-gh-docker-actions/common/docker-registry-login@main
         with:
-          registry: ${{ env.TESTGH_ACR_REGISTRY }}
-          username: ${{ env.TESTGH_ACR_USERNAME }}
-          password: ${{ secrets.TESTGH_ACR_PASSWORD }}
+          registry: ${{ env.DOCKER_REGISTRY_URL }}
+          username: ${{ env.DOCKER_REGISTRY_USER }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: a-magdy/test-gh-docker-actions/test-gh-docker/image@main
     continue-on-error: true
-
-  run-image-action-success:
-    name: Run Image Action
+  run-image-action-succeeds:
+    name: Image (Succeeds)
     runs-on: ubuntu-latest
-    needs: run-image-action-fail
+    needs: run-image-action-fails
     permissions:
       contents: read
+      packages: read
     steps:
       - uses: a-magdy/test-gh-docker-actions/common/docker-registry-login@main
         with:
-          registry: ${{ env.TESTGH_ACR_REGISTRY }}
-          username: ${{ env.TESTGH_ACR_USERNAME }}
-          password: ${{ secrets.TESTGH_ACR_PASSWORD }}
+          registry: ${{ env.DOCKER_REGISTRY_URL }}
+          username: ${{ env.DOCKER_REGISTRY_USER }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/checkout@v4
 
-      - run: docker pull testgh.azurecr.io/test
+      - run: docker pull ghcr.io/a-magdy/ubuntu
 
       - uses: ./test-gh-docker/image
 
-  dind-run-image:
-    name: DinD Run Image (Fail)
+  dind-run-image-fails:
+    name: DinD - Image (Fails)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     container:
-      image: testgh.azurecr.io/dind:latest
+      image: ghcr.io/a-magdy/dind
       credentials:
-        username: ${{ env.TESTGH_ACR_USERNAME }}
-        password: ${{ secrets.TESTGH_ACR_PASSWORD }}
+        username: ${{ env.DOCKER_REGISTRY_USER }}
+        password: ${{ secrets.GITHUB_TOKEN }}
       options: --privileged # For Docker-in-Docker if needed
     steps:
       - name: Docker Registry Login
         uses: a-magdy/test-gh-docker-actions/common/docker-registry-login@main
         with:
-          registry: ${{ env.TESTGH_ACR_REGISTRY }}
-          username: ${{ env.TESTGH_ACR_USERNAME }}
-          password: ${{ secrets.TESTGH_ACR_PASSWORD }}
+          registry: ${{ env.DOCKER_REGISTRY_URL }}
+          username: ${{ env.DOCKER_REGISTRY_USER }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Run Image Action (Fail)
+      - name: Run Image Action
         uses: a-magdy/test-gh-docker-actions/test-gh-docker/image@main
     continue-on-error: true
-  dind-run-dockerfile:
-    name: DinD Run Dockerfile (Fail)
+  dind-run-dockerfile-fails:
+    name: DinD - Dockerfile (Fails)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
     container:
-      image: testgh.azurecr.io/dind:latest
+      image: ghcr.io/a-magdy/dind
       credentials:
-        username: ${{ env.TESTGH_ACR_USERNAME }}
-        password: ${{ secrets.TESTGH_ACR_PASSWORD }}
+        username: ${{ env.DOCKER_REGISTRY_USER }}
+        password: ${{ secrets.GITHUB_TOKEN }}
       options: --privileged # For Docker-in-Docker if needed
     steps:
       - name: Docker Registry Login
         uses: a-magdy/test-gh-docker-actions/common/docker-registry-login@main
         with:
-          registry: ${{ env.TESTGH_ACR_REGISTRY }}
-          username: ${{ env.TESTGH_ACR_USERNAME }}
-          password: ${{ secrets.TESTGH_ACR_PASSWORD }}
+          registry: ${{ env.DOCKER_REGISTRY_URL }}
+          username: ${{ env.DOCKER_REGISTRY_USER }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Run Dockerfile Action (Fail)
+      - name: Run Dockerfile Action
         uses: a-magdy/test-gh-docker-actions/test-gh-docker/dockerfile@main
     continue-on-error: true
-  dind-composite-action:
-    name: DinD Composite Action
+  dind-composite-action-succeeds:
+    name: DinD - Composite (Succeeds)
     runs-on: ubuntu-latest
-    needs: [dind-run-image, dind-run-dockerfile]
+    needs: [dind-run-image-fails, dind-run-dockerfile-fails]
+    permissions:
+      contents: read
+      packages: read
     container:
-      image: testgh.azurecr.io/dind:latest
+      image: ghcr.io/a-magdy/dind
       credentials:
-        username: ${{ env.TESTGH_ACR_USERNAME }}
-        password: ${{ secrets.TESTGH_ACR_PASSWORD }}
+        username: ${{ env.DOCKER_REGISTRY_USER }}
+        password: ${{ secrets.GITHUB_TOKEN }}
       options: --privileged # For Docker-in-Docker if needed
     steps:
       - uses: actions/checkout@v4
@@ -145,10 +163,10 @@ jobs:
       - name: Docker Registry Login
         uses: a-magdy/test-gh-docker-actions/common/docker-registry-login@main
         with:
-          registry: ${{ env.TESTGH_ACR_REGISTRY }}
-          username: ${{ env.TESTGH_ACR_USERNAME }}
-          password: ${{ secrets.TESTGH_ACR_PASSWORD }}
+          registry: ${{ env.DOCKER_REGISTRY_URL }}
+          username: ${{ env.DOCKER_REGISTRY_USER }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Test image
         shell: bash
-        run: docker run --rm testgh.azurecr.io/test echo "Hello from Docker in DinD"
+        run: docker run --rm ghcr.io/a-magdy/ubuntu echo "Hello from Docker in DinD"
