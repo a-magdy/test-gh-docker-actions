@@ -9,27 +9,27 @@ on:
 
 jobs:
   test-composite:
-    name: Test Composite Action
+    name: Composite
     uses: ./.github/workflows/test-composite-action.yml
     secrets: inherit
 
   test-dockerfile:
-    name: Test Dockerfile Action
+    name: Dockerfile
     uses: ./.github/workflows/test-dockerfile-action.yml
     secrets: inherit
 
   test-image:
-    name: Test Image Action
+    name: Image
     uses: ./.github/workflows/test-image-action.yml
     secrets: inherit
 
   test-dind:
-    name: Test Docker-in-Docker
+    name: Dind
     uses: ./.github/workflows/test-dind.yml
     secrets: inherit
 
   summary:
-    name: Test Summary
+    name: Summary
     runs-on: ubuntu-latest
     needs: [test-composite, test-dockerfile, test-image, test-dind]
     if: always()
