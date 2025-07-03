@@ -13,7 +13,7 @@ env:
 
 jobs:
   run-composite-action:
-    name: Run Composite Action (Succeeds)
+    name: Composite (Succeeds)
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -30,7 +30,7 @@ jobs:
           image: ${{ env.DOCKER_REGISTRY_URL }}/${{ env.DOCKER_REGISTRY_USER }}/ubuntu
 
   run-dockerfile-action-fail:
-    name: Run Dockerfile Action (Fails)
+    name: Dockerfile (Fails)
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -46,7 +46,7 @@ jobs:
     continue-on-error: true
 
   run-dockerfile-action-success:
-    name: Run Dockerfile Action (Succeeds)
+    name: Dockerfile (Succeeds)
     runs-on: ubuntu-latest
     needs: run-dockerfile-action-fail
     permissions:
@@ -65,7 +65,7 @@ jobs:
         uses: ./test-gh-docker/dockerfile
 
   run-image-action-fail:
-    name: Run Image Action (Fails)
+    name: Image (Fails)
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -81,7 +81,7 @@ jobs:
     continue-on-error: true
 
   run-image-action-success:
-    name: Run Image Action (Succeeds)
+    name: Image (Succeeds)
     runs-on: ubuntu-latest
     needs: run-image-action-fail
     permissions:
@@ -101,7 +101,7 @@ jobs:
       - uses: ./test-gh-docker/image
 
   dind-run-image:
-    name: DinD Run Image (Fails)
+    name: DinD - Image (Fails)
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -124,7 +124,7 @@ jobs:
         uses: a-magdy/test-gh-docker-actions/test-gh-docker/image@main
     continue-on-error: true
   dind-run-dockerfile:
-    name: DinD Run Dockerfile (Fails)
+    name: DinD - Dockerfile (Fails)
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -147,7 +147,7 @@ jobs:
         uses: a-magdy/test-gh-docker-actions/test-gh-docker/dockerfile@main
     continue-on-error: true
   dind-composite-action:
-    name: DinD Composite Action (Succeeds)
+    name: DinD - Composite (Succeeds)
     runs-on: ubuntu-latest
     needs: [dind-run-image, dind-run-dockerfile]
     permissions:
