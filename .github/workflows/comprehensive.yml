@@ -1,4 +1,4 @@
-name: Test Docker Actions with Private Images
+name: Test Docker Actions (Comprehensive)
 
 on:
   workflow_dispatch:
