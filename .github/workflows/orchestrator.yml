@@ -1,0 +1,29 @@
+name: Test All Docker Actions (Orchestrator)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test-composite:
+    name: Composite
+    uses: ./.github/workflows/composite.yml
+    secrets: inherit
+
+  test-dockerfile:
+    name: Dockerfile
+    uses: ./.github/workflows/dockerfile.yml
+    secrets: inherit
+
+  test-image:
+    name: Image
+    uses: ./.github/workflows/image.yml
+    secrets: inherit
+
+  test-dind:
+    name: Dind
+    uses: ./.github/workflows/dind.yml
+    secrets: inherit

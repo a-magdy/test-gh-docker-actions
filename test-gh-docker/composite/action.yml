@@ -1,5 +1,5 @@
-name: "Docker composite Private Action"
-description: "Test Docker composite action in Private ACR"
+name: "Docker Composite Private Registry"
+description: "Test Docker composite action with private registry"
 
 inputs:
   image:

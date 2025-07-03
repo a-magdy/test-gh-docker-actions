@@ -1,5 +1,5 @@
-name: "Docker Image Private ACR"
-description: "Test Docker Image in Private ACR"
+name: "Docker Image Private Registry"
+description: "Test Docker Image action with private registry"
 runs:
   using: "docker"
   image: "docker://ghcr.io/a-magdy/ubuntu"
