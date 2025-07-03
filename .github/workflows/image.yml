@@ -12,18 +12,18 @@ jobs:
   run-image-action-fails:
     name: Image (Fails)
     runs-on: ubuntu-latest
+    continue-on-error: true
     permissions:
       contents: read
       packages: read
     steps:
-      - uses: a-magdy/test-gh-docker-actions/common/docker-registry-login@main
+      - uses: docker/login-action@v3
         with:
           registry: ${{ env.DOCKER_REGISTRY_URL }}
           username: ${{ env.DOCKER_REGISTRY_USER }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: a-magdy/test-gh-docker-actions/test-gh-docker/image@main
-        continue-on-error: true
 
   run-image-action-succeeds:
     name: Image (Succeeds)
@@ -33,7 +33,7 @@ jobs:
       contents: read
       packages: read
     steps:
-      - uses: a-magdy/test-gh-docker-actions/common/docker-registry-login@main
+      - uses: docker/login-action@v3
         with:
           registry: ${{ env.DOCKER_REGISTRY_URL }}
           username: ${{ env.DOCKER_REGISTRY_USER }}

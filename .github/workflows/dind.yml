@@ -12,6 +12,7 @@ jobs:
   dind-run-image-fails:
     name: DinD - Image (Fails)
     runs-on: ubuntu-latest
+    continue-on-error: true
     permissions:
       contents: read
       packages: read
@@ -23,7 +24,7 @@ jobs:
       options: --privileged # For Docker-in-Docker if needed
     steps:
       - name: Docker Registry Login
-        uses: a-magdy/test-gh-docker-actions/common/docker-registry-login@main
+        uses: docker/login-action@v3
         with:
           registry: ${{ env.DOCKER_REGISTRY_URL }}
           username: ${{ env.DOCKER_REGISTRY_USER }}
@@ -31,11 +32,11 @@ jobs:
 
       - name: Run Image Action
         uses: a-magdy/test-gh-docker-actions/test-gh-docker/image@main
-        continue-on-error: true
 
   dind-run-dockerfile-fails:
     name: DinD - Dockerfile (Fails)
     runs-on: ubuntu-latest
+    continue-on-error: true
     permissions:
       contents: read
       packages: read
@@ -47,7 +48,7 @@ jobs:
       options: --privileged # For Docker-in-Docker if needed
     steps:
       - name: Docker Registry Login
-        uses: a-magdy/test-gh-docker-actions/common/docker-registry-login@main
+        uses: docker/login-action@v3
         with:
           registry: ${{ env.DOCKER_REGISTRY_URL }}
           username: ${{ env.DOCKER_REGISTRY_USER }}
@@ -55,7 +56,6 @@ jobs:
 
       - name: Run Dockerfile Action
         uses: a-magdy/test-gh-docker-actions/test-gh-docker/dockerfile@main
-        continue-on-error: true
 
   dind-composite-action-succeeds:
     name: DinD - Composite (Succeeds)
@@ -74,7 +74,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Docker Registry Login
-        uses: a-magdy/test-gh-docker-actions/common/docker-registry-login@main
+        uses: docker/login-action@v3
         with:
           registry: ${{ env.DOCKER_REGISTRY_URL }}
           username: ${{ env.DOCKER_REGISTRY_USER }}

@@ -16,7 +16,7 @@ jobs:
       contents: read
       packages: read
     steps:
-      - uses: a-magdy/test-gh-docker-actions/common/docker-registry-login@main
+      - uses: docker/login-action@v3
         with:
           registry: ${{ env.DOCKER_REGISTRY_URL }}
           username: ${{ env.DOCKER_REGISTRY_USER }}
