@@ -2,10 +2,6 @@ name: "Docker composite Private Action"
 description: "Test Docker composite action in Private ACR"
 
 inputs:
-  registry:
-    description: "Docker registry URL"
-    required: false
-    default: "docker.io"
   image:
     description: "Docker image name"
     required: false
@@ -16,4 +12,4 @@ runs:
   steps:
     - name: Docker run
       shell: bash
-      run: docker run --rm --entrypoint /bin/sh ${{ inputs.registry }}/${{ inputs.image }} -c 'echo "Hello from Docker container"'
+      run: docker run --rm --entrypoint /bin/sh ${{ inputs.image }} -c 'echo "Hello from Docker container"'

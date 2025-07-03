@@ -13,7 +13,7 @@ env:
 
 jobs:
   run-composite-action:
-    name: Run Composite Action (Will Succeed)
+    name: Run Composite Action (Succeeds)
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -27,11 +27,10 @@ jobs:
 
       - uses: a-magdy/test-gh-docker-actions/test-gh-docker/composite@main
         with:
-          registry: ${{ env.DOCKER_REGISTRY_URL }}
-          image: ${{ env.DOCKER_REGISTRY_USER }}/ubuntu
+          image: ${{ env.DOCKER_REGISTRY_URL }}/${{ env.DOCKER_REGISTRY_USER }}/ubuntu
 
   run-dockerfile-action-fail:
-    name: Run Dockerfile Action (Will Fail)
+    name: Run Dockerfile Action (Fails)
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -47,7 +46,7 @@ jobs:
     continue-on-error: true
 
   run-dockerfile-action-success:
-    name: Run Dockerfile Action (Will Succeed)
+    name: Run Dockerfile Action (Succeeds)
     runs-on: ubuntu-latest
     needs: run-dockerfile-action-fail
     permissions:
@@ -66,7 +65,7 @@ jobs:
         uses: ./test-gh-docker/dockerfile
 
   run-image-action-fail:
-    name: Run Image Action (Will Fail)
+    name: Run Image Action (Fails)
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -82,7 +81,7 @@ jobs:
     continue-on-error: true
 
   run-image-action-success:
-    name: Run Image Action (Will Succeed)
+    name: Run Image Action (Succeeds)
     runs-on: ubuntu-latest
     needs: run-image-action-fail
     permissions:
@@ -102,7 +101,7 @@ jobs:
       - uses: ./test-gh-docker/image
 
   dind-run-image:
-    name: DinD Run Image (Will Fail)
+    name: DinD Run Image (Fails)
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -125,7 +124,7 @@ jobs:
         uses: a-magdy/test-gh-docker-actions/test-gh-docker/image@main
     continue-on-error: true
   dind-run-dockerfile:
-    name: DinD Run Dockerfile (Will Fail)
+    name: DinD Run Dockerfile (Fails)
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -148,7 +147,7 @@ jobs:
         uses: a-magdy/test-gh-docker-actions/test-gh-docker/dockerfile@main
     continue-on-error: true
   dind-composite-action:
-    name: DinD Composite Action (Will Succeed)
+    name: DinD Composite Action (Succeeds)
     runs-on: ubuntu-latest
     needs: [dind-run-image, dind-run-dockerfile]
     permissions:
