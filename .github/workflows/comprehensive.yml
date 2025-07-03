@@ -1,4 +1,4 @@
-name: Test Docker Actions (Comprehensive)
+name: Test All Docker Actions (Comprehensive)
 
 on:
   workflow_dispatch:

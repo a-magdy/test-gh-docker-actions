@@ -1,4 +1,4 @@
-name: Test Docker-in-Docker (DinD)
+name: Test Docker-in-Docker
 
 on:
   workflow_dispatch:

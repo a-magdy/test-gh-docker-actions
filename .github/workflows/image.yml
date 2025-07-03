@@ -1,4 +1,4 @@
-name: Test Image Action
+name: Test Image
 
 on:
   workflow_dispatch:

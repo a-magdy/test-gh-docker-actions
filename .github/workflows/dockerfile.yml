@@ -1,4 +1,4 @@
-name: Test Dockerfile Action
+name: Test Dockerfile
 
 on:
   workflow_dispatch:
