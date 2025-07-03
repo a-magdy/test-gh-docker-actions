@@ -4,7 +4,7 @@ This repository demonstrates authentication issues when using GitHub Actions wit
 
 ## Problem Overview
 
-GitHub Actions handle Docker authentication inconsistently when using private registries, causing some action types to fail while others work perfectly. This affects enterprise users with private registries (ACR, ECR, GHCR, etc.) and forces the use of inefficient workarounds.
+The problem centers around when private images are being pulled. In certain scenarios, GitHub Actions tries to pull the images early in the process, but ends up doing it before the login has happened, resulting in a 401 Unauthorized error.
 
 ## What We're Testing
 
@@ -31,70 +31,36 @@ Each test demonstrates the authentication behavior across three Docker action ty
 
 ### 2. **Dockerfile Actions** (`using: "docker"`, `image: "Dockerfile"`)
 
-- **Remote call**: ❌ Fails (no access to authentication)
-- **Local call**: ✅ Succeeds (after `actions/checkout`)
-- **Reason**: Inconsistent authentication propagation
+- **Remote call**: ❌ Fails (triggers a pull before login step)
+- **Local call**: ✅ Succeeds (after `actions/checkout` and login)
+- **Reason**: In remote calls, a dynamically added step tries to pull the image before authentication is set up, leading to a 401 Unauthorized error. Local calls work because they run after the login step, which has the necessary authentication.
 
 ### 3. **Image Actions** (`using: "docker"`, `image: "docker://registry/image"`)
 
-- **Remote call**: ❌ Fails (cannot pull private image)
-- **Local call**: ✅ Succeeds (after pre-pulling image)
-- **Reason**: Docker authentication doesn't propagate to action runner
+- **Remote call**: ❌ Fails (same issue as Dockerfile actions)
+- **Local call**: ✅ Succeeds (only after pre-pulling image)
 
 ## Repository Structure
 
-### Test Actions
+### Test Reusable Actions
 
-```
+```text
 test-gh-docker/
 ├── composite/          # 🧩 Composite action (always works)
 ├── dockerfile/         # 🐳 Dockerfile action (works locally)
 └── image/             # 📦 Image action (works with workarounds)
-
-common/
-└── docker-registry-login/  # 🔐 Shared login action
 ```
 
 ### Workflows
 
-```
+```text
 .github/workflows/
 ├── orchestrator.yml         # 🎯 Calls other workflows (organized)
 ├── comprehensive.yml        # 📋 All tests in one file (monolithic)
 ├── composite.yml            # 🧩 Individual: Composite tests
 ├── dockerfile.yml           # 🐳 Individual: Dockerfile tests  
-├── image.yml                # 📦 Individual: Image tests
+├── image.yml                # 📦 Individual: Image Reference tests
 └── dind.yml                # 🔄 Individual: Docker-in-Docker tests
-```
-
-## Usage Patterns
-
-### **For Development & Debugging**
-
-Use individual workflows for focused testing:
-
-```bash
-# Test specific action type
-gh workflow run composite.yml
-gh workflow run dockerfile.yml
-gh workflow run image.yml
-gh workflow run dind.yml
-```
-
-### **For Organized Testing**
-
-Use the orchestrator for parallel execution:
-
-```bash
-gh workflow run orchestrator.yml
-```
-
-### **For Comprehensive Demonstration**
-
-Use the comprehensive workflow to show all issues in one place:
-
-```bash
-gh workflow run comprehensive.yml
 ```
 
 ## Example Results
@@ -102,7 +68,13 @@ gh workflow run comprehensive.yml
 After running `docker/login-action` to authenticate with a private registry:
 
 ```yaml
-# ❌ This fails - Docker action cannot access authentication
+- uses: docker/login-action@v3
+  with:
+    registry: private-registry
+    username: ${{ secrets.DOCKER_USERNAME }}
+    password: ${{ secrets.DOCKER_PASSWORD }}
+
+# ❌ This fails
 - uses: my-org/my-docker-action@main  # uses: docker, image: docker://private-registry/image
 
 # ✅ This works - Local call with checkout
@@ -115,15 +87,14 @@ After running `docker/login-action` to authenticate with a private registry:
 
 ## Root Cause
 
-Docker authentication from `docker/login-action` doesn't properly propagate to GitHub Actions' Docker action runner, but it does work for direct `docker` commands in composite actions and workflow steps.
+GitHub Actions tries to pull/build actions dynamically, which happens before all other steps (including docker login), leading to a failure when the action attempts to pull a private image without authentication.
 
 ## Current Workarounds
 
-1. **Use `actions/checkout` before calling Docker actions locally**
-2. **Pre-pull images with `docker pull`**
-3. **Convert to composite actions using `docker run`**
-4. **Use Docker-in-Docker containers**
-5. **Make images public** (not feasible for enterprise)
+1. **Use `actions/checkout` before calling Docker actions locally** (to use either `docker` or `image reference` actions)
+2. **Pre-pull images with `docker pull`** for image reference actions
+3. **Convert to composite actions using `docker run`** (Best solution currently)
+4. **Make images public** (not feasible for enterprise)
 
 ## Expected Behavior
 
@@ -141,7 +112,7 @@ This affects enterprise users with private registries and forces:
 ## Environment
 
 - **Runners**: `ubuntu-latest`
-- **Registries**: Tested with ACR, GHCR, ECR
+- **Registries**: Tested with ACR, GHCR
 - **Authentication**: `docker/login-action@v3`
 - **GitHub Token**: `GITHUB_TOKEN` with `packages: read` permission
 
@@ -158,4 +129,7 @@ The failing tests demonstrate the core issue, while the succeeding tests show th
 
 ---
 
-**Related Issues**: [GitHub Community Discussion](https://github.com/orgs/community/discussions) • [Docker/login-action](https://github.com/docker/login-action) • [Actions/runner](https://github.com/actions/runner)
+**References**:
+
+- [josh-ops - Create a Docker Container Action Hosted in a Private Image Registry](https://josh-ops.com/posts/github-actions-docker-actions-private-registry/)
+- [moby/moby - Issue 38591](https://github.com/moby/moby/issues/38591) (potentially relevant)

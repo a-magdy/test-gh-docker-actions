@@ -23,7 +23,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: a-magdy/test-gh-docker-actions/test-gh-docker/image@main
-    continue-on-error: true
+        continue-on-error: true
 
   run-image-action-succeeds:
     name: Image (Succeeds)
