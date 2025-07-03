@@ -27,21 +27,3 @@ jobs:
     name: Dind
     uses: ./.github/workflows/dind.yml
     secrets: inherit
-
-  summary:
-    name: Summary
-    runs-on: ubuntu-latest
-    needs: [test-composite, test-dockerfile, test-image, test-dind]
-    if: always()
-    steps:
-      - name: Check results
-        run: |
-          {
-            echo "## Test Results Summary"
-            echo "| Test Type | Status |"
-            echo "|-----------|--------|"
-            echo "| Composite | ${{ needs.test-composite.result }} |"
-            echo "| Dockerfile | ${{ needs.test-dockerfile.result }} |"
-            echo "| Image | ${{ needs.test-image.result }} |"
-            echo "| DinD | ${{ needs.test-dind.result }} |"
-          } >> "$GITHUB_STEP_SUMMARY"
